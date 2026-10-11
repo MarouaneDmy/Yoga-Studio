@@ -1,30 +1,37 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import api from '../services/api';
-import { authService } from '../services/auth.service';
-import { Teacher, Session } from '../types';
+import {
+  useState,
+  useEffect,
+  ChangeEvent,
+  FormEvent,
+  SyntheticEvent,
+} from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import api from "../services/api";
+import { authService } from "../services/auth.service";
+import { Teacher, Session, SessionFormData } from "../types";
+import axios from "axios";
 
 function SessionForm() {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEditMode = !!id;
 
-  const [formData, setFormData] = useState<any>({
-    name: '',
-    date: '',
-    description: '',
-    teacherId: '',
+  const [formData, setFormData] = useState<SessionFormData>({
+    name: "",
+    date: "",
+    description: "",
+    teacherId: null,
   });
-  const [teachers, setTeachers] = useState<any>([]);
-  const [loading, setLoading] = useState<any>(false);
-  const [error, setError] = useState<any>('');
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
   const user = authService.getCurrentUser();
   const token = authService.getToken();
 
   // Redirect if not admin
   useEffect(() => {
     if (!user || !user.admin) {
-      navigate('/sessions');
+      navigate("/sessions");
     }
   }, [user, navigate]);
 
@@ -35,20 +42,20 @@ function SessionForm() {
     }
   }, [id]);
 
-  const fetchTeachers = async (): Promise<any> => {
+  const fetchTeachers = async (): Promise<void> => {
     try {
-      const response = await api.get<Teacher[]>('/teacher', {
+      const response = await api.get<Teacher[]>("/teacher", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
       setTeachers(response.data);
-    } catch (err: any) {
-      console.error('Failed to fetch teachers', err);
+    } catch (err: unknown) {
+      console.error("Failed to fetch teachers", err);
     }
   };
 
-  const fetchSession = async (): Promise<any> => {
+  const fetchSession = async (): Promise<void> => {
     try {
       const response = await api.get<Session>(`/session/${id}`, {
         headers: {
@@ -58,28 +65,32 @@ function SessionForm() {
       const session = response.data;
       setFormData({
         name: session.name,
-        date: new Date(session.date).toISOString().split('T')[0],
+        date: new Date(session.date).toISOString().split("T")[0],
         description: session.description,
         teacherId: session.teacher.id,
       });
-    } catch (err: any) {
-      setError('Failed to load session');
+    } catch (err: unknown) {
+      setError("Failed to load session");
       console.error(err);
     }
   };
 
-  const handleChange = (e: any): any => {
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
+  ): void => {
     const value =
-      e.target.name === 'teacherId' ? parseInt(e.target.value) : e.target.value;
+      e.target.name === "teacherId" ? parseInt(e.target.value) : e.target.value;
     setFormData({
       ...formData,
       [e.target.name]: value,
     });
   };
 
-  const handleSubmit = async (e: any): Promise<any> => {
+  const handleSubmit = async (
+    e: SyntheticEvent<HTMLFormElement>,
+  ): Promise<void> => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
@@ -90,15 +101,19 @@ function SessionForm() {
           },
         });
       } else {
-        await api.post('/session', formData, {
+        await api.post("/session", formData, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
       }
-      navigate('/sessions');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to save session');
+      navigate("/sessions");
+    } catch (err: unknown) {
+      if (axios.isAxiosError<{ message?: string }>(err)) {
+        setError(err.response?.data?.message || "Failed to save session");
+      } else {
+        setError("Failed to save session");
+      }
     } finally {
       setLoading(false);
     }
@@ -109,7 +124,7 @@ function SessionForm() {
       <div className="container mx-auto px-4 max-w-2xl">
         <div className="bg-white rounded-lg shadow-md p-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-8">
-            {isEditMode ? 'Edit Session' : 'Create New Session'}
+            {isEditMode ? "Edit Session" : "Create New Session"}
           </h1>
 
           {error ? (
@@ -153,13 +168,13 @@ function SessionForm() {
               </label>
               <select
                 name="teacherId"
-                value={formData.teacherId}
+                value={formData.teacherId ?? ""}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500"
                 required
               >
                 <option value="">Select a teacher</option>
-                {teachers.map((teacher: any) => (
+                {teachers.map((teacher: Teacher) => (
                   <option key={teacher.id} value={teacher.id}>
                     {teacher.firstName} {teacher.lastName}
                   </option>
@@ -187,11 +202,15 @@ function SessionForm() {
                 disabled={loading}
                 className="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 disabled:bg-gray-400"
               >
-                {loading ? 'Saving...' : isEditMode ? 'Update Session' : 'Create Session'}
+                {loading
+                  ? "Saving..."
+                  : isEditMode
+                    ? "Update Session"
+                    : "Create Session"}
               </button>
               <button
                 type="button"
-                onClick={() => navigate('/sessions')}
+                onClick={() => navigate("/sessions")}
                 className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400"
               >
                 Cancel

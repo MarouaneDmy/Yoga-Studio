@@ -1,15 +1,15 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import api from '../services/api';
-import { authService } from '../services/auth.service';
-import { Session } from '../types';
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import api from "../services/api";
+import { authService } from "../services/auth.service";
+import { Session } from "../types";
 
 function SessionDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [session, setSession] = useState<any>(null);
-  const [loading, setLoading] = useState<any>(true);
-  const [error, setError] = useState<any>('');
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>("");
   const user = authService.getCurrentUser();
   const token = authService.getToken();
 
@@ -17,7 +17,7 @@ function SessionDetail() {
     fetchSession();
   }, [id]);
 
-  const fetchSession = async (): Promise<any> => {
+  const fetchSession = async (): Promise<void> => {
     try {
       setLoading(true);
       const response = await api.get<Session>(`/session/${id}`, {
@@ -26,48 +26,48 @@ function SessionDetail() {
         },
       });
       setSession(response.data);
-    } catch (err: any) {
-      setError('Failed to load session details');
+    } catch (err: unknown) {
+      setError("Failed to load session details");
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleParticipate = async (): Promise<any> => {
+  const handleParticipate = async (): Promise<void> => {
     try {
       await api.post(
-        `/session/${id}/participate/${user.id}`,
+        `/session/${id}/participate/${user?.id}`,
         {},
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       fetchSession();
-    } catch (err: any) {
-      alert('Failed to join session');
+    } catch (err: unknown) {
+      alert("Failed to join session");
       console.error(err);
     }
   };
 
-  const handleUnparticipate = async (): Promise<any> => {
+  const handleUnparticipate = async (): Promise<void> => {
     try {
-      await api.delete(`/session/${id}/participate/${user.id}`, {
+      await api.delete(`/session/${id}/participate/${user?.id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
       fetchSession();
-    } catch (err: any) {
-      alert('Failed to leave session');
+    } catch (err: unknown) {
+      alert("Failed to leave session");
       console.error(err);
     }
   };
 
-  const handleDelete = async (): Promise<any> => {
-    if (!window.confirm('Are you sure you want to delete this session?')) {
+  const handleDelete = async (): Promise<void> => {
+    if (!window.confirm("Are you sure you want to delete this session?")) {
       return;
     }
 
@@ -77,9 +77,9 @@ function SessionDetail() {
           Authorization: `Bearer ${token}`,
         },
       });
-      navigate('/sessions');
-    } catch (err: any) {
-      alert('Failed to delete session');
+      navigate("/sessions");
+    } catch (err: unknown) {
+      alert("Failed to delete session");
       console.error(err);
     }
   };
@@ -96,13 +96,13 @@ function SessionDetail() {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          {error || 'Session not found'}
+          {error || "Session not found"}
         </div>
       </div>
     );
   }
 
-  const isParticipating = session.users.includes(user.id);
+  const isParticipating = user?.id ? session.users.includes(user.id) : false;
 
   return (
     <div className="min-h-screen bg-gray-100 py-8">
@@ -113,19 +113,21 @@ function SessionDetail() {
           </h1>
 
           <div className="mb-6">
-            <h2 className="text-xl font-semibold text-gray-700 mb-2">Details</h2>
+            <h2 className="text-xl font-semibold text-gray-700 mb-2">
+              Details
+            </h2>
             <div className="space-y-2 text-gray-600">
               <p>
-                <strong>Date:</strong>{' '}
-                {new Date(session.date).toLocaleDateString('en-US', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
+                <strong>Date:</strong>{" "}
+                {new Date(session.date).toLocaleDateString("en-US", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
                 })}
               </p>
               <p>
-                <strong>Teacher:</strong> {session.teacher.firstName}{' '}
+                <strong>Teacher:</strong> {session.teacher.firstName}{" "}
                 {session.teacher.lastName}
               </p>
               <p>
@@ -144,7 +146,7 @@ function SessionDetail() {
           </div>
 
           <div className="flex space-x-4">
-            {user.admin ? (
+            {user?.admin ? (
               <>
                 <button
                   onClick={() => navigate(`/sessions/edit/${id}`)}
@@ -180,7 +182,7 @@ function SessionDetail() {
             )}
 
             <button
-              onClick={() => navigate('/sessions')}
+              onClick={() => navigate("/sessions")}
               className="bg-gray-300 text-gray-700 px-6 py-2 rounded hover:bg-gray-400"
             >
               Back to Sessions
