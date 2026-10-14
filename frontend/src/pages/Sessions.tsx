@@ -29,7 +29,7 @@ function Sessions() {
           Authorization: `Bearer ${token}`,
         },
       });
-      refetch(); // ✅ Recharge les données proprement
+      refetch();
     } catch (err: unknown) {
       alert("Failed to delete session");
       console.error(err);
@@ -60,7 +60,6 @@ function Sessions() {
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-800">Yoga Sessions</h1>
 
-          {/* ✅ 5. Court-circuit (&&) au lieu de ternaire avec null */}
           {user?.admin && (
             <Link
               to="/sessions/create"
