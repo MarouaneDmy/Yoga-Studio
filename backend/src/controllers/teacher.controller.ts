@@ -1,67 +1,31 @@
-import { Response } from 'express';
-import { PrismaClient } from '@prisma/client';
-import { AuthRequest } from '../middleware/auth.middleware';
-
-const prisma = new PrismaClient();
+import { Response } from "express";
+import { teacherService } from "../services/teacher.service";
+import { catchAsync } from "../utils/catchAsync";
+import { AppError } from "../utils/AppError";
+import { AuthRequest } from "../middleware/auth.middleware";
 
 export class TeacherController {
-  async getAll(req: AuthRequest, res: Response) {
-    try {
-      const teachers = await prisma.teacher.findMany({
-        orderBy: {
-          createdAt: 'desc',
-        },
-      });
+  getAll = catchAsync(async (req: AuthRequest, res: Response) => {
+    const teachers = await teacherService.getAll();
+    res.status(200).json(teachers);
+  });
 
-      const response: any = teachers.map((teacher: any) => ({
-        id: teacher.id,
-        firstName: teacher.firstName,
-        lastName: teacher.lastName,
-        createdAt: teacher.createdAt,
-        updatedAt: teacher.updatedAt,
-      }));
+  getById = catchAsync(async (req: AuthRequest, res: Response) => {
+    const { id } = req.params as { id: string };
 
-      return res.status(200).json(response);
-    } catch (error: any) {
-      console.error('Get teachers error:', error);
-      return res.status(500).json({ message: 'Internal server error' });
+    if (!id) {
+      throw new AppError("Teacher ID is required", 400);
     }
-  }
 
-  async getById(req: AuthRequest, res: Response) {
-    try {
-      const { id } = req.params as { id: string };
+    const teacherId = parseInt(id, 10);
 
-      if (!id) {
-        return res.status(400).json({ message: 'Teacher ID is required' });
-      }
-
-      const teacherId = parseInt(id);
-
-      if (isNaN(teacherId)) {
-        return res.status(400).json({ message: 'Invalid teacher ID' });
-      }
-
-      const teacher = await prisma.teacher.findUnique({
-        where: { id: teacherId },
-      });
-
-      if (!teacher) {
-        return res.status(404).json({ message: 'Teacher not found' });
-      }
-
-      const response: any = {
-        id: teacher.id,
-        firstName: teacher.firstName,
-        lastName: teacher.lastName,
-        createdAt: teacher.createdAt,
-        updatedAt: teacher.updatedAt,
-      };
-
-      return res.status(200).json(response);
-    } catch (error: any) {
-      console.error('Get teacher error:', error);
-      return res.status(500).json({ message: 'Internal server error' });
+    if (isNaN(teacherId)) {
+      throw new AppError("Invalid teacher ID", 400);
     }
-  }
+
+    const teacher = await teacherService.getById(teacherId);
+    res.status(200).json(teacher);
+  });
 }
+
+export const teacherController = new TeacherController();
