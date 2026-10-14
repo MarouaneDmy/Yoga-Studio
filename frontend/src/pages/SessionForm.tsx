@@ -1,10 +1,4 @@
-import {
-  useState,
-  useEffect,
-  ChangeEvent,
-  FormEvent,
-  SyntheticEvent,
-} from "react";
+import { useState, useEffect, ChangeEvent, SyntheticEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../services/api";
 import { authService } from "../services/auth.service";

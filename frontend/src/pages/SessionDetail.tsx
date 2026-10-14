@@ -1,38 +1,24 @@
-import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { authService } from "../services/auth.service";
 import { Session } from "../types";
+import { useFetch } from "../hooks/useFetch";
 
 function SessionDetail() {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string>("");
   const user = authService.getCurrentUser();
   const token = authService.getToken();
 
-  useEffect(() => {
-    fetchSession();
-  }, [id]);
-
-  const fetchSession = async (): Promise<void> => {
-    try {
-      setLoading(true);
-      const response = await api.get<Session>(`/session/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setSession(response.data);
-    } catch (err: unknown) {
-      setError("Failed to load session details");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    data: session,
+    loading,
+    error,
+    refetch,
+  } = useFetch<Session>({
+    url: `/session/${id}`,
+    dependencies: [id, token],
+  });
 
   const handleParticipate = async (): Promise<void> => {
     try {
@@ -45,7 +31,7 @@ function SessionDetail() {
           },
         },
       );
-      fetchSession();
+      refetch();
     } catch (err: unknown) {
       alert("Failed to join session");
       console.error(err);
@@ -59,7 +45,7 @@ function SessionDetail() {
           Authorization: `Bearer ${token}`,
         },
       });
-      fetchSession();
+      refetch();
     } catch (err: unknown) {
       alert("Failed to leave session");
       console.error(err);

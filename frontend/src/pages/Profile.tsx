@@ -1,42 +1,31 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { authService } from "../services/auth.service";
 import { User } from "../types";
+import { useFetch } from "../hooks/useFetch"; // ✅ 1. Import du hook
 
 function Profile() {
   const navigate = useNavigate();
-  const [userInfo, setUserInfo] = useState<User | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string>("");
-  const [promoteLoading, setPromoteLoading] = useState<boolean>(false);
-  const [promoteError, setPromoteError] = useState<string>("");
   const user = authService.getCurrentUser();
   const token = authService.getToken();
-  const isDev = (import.meta as any).env?.DEV === true;
 
-  useEffect(() => {
-    if (user) {
-      fetchUserInfo();
-    }
-  }, []);
+  const isDev = (import.meta as any).env?.DEV;
 
-  const fetchUserInfo = async (): Promise<void> => {
-    try {
-      setLoading(true);
-      const response = await api.get(`/user/${user?.id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setUserInfo(response.data);
-    } catch (err: unknown) {
-      setError("Failed to load user information");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const userId = user?.id;
+
+  const {
+    data: userInfo,
+    loading,
+    error,
+    refetch,
+  } = useFetch<User>({
+    url: `/user/${userId}`,
+    dependencies: [userId, token],
+  });
+
+  const [promoteLoading, setPromoteLoading] = useState<boolean>(false);
+  const [promoteError, setPromoteError] = useState<string>("");
 
   const handleDeleteAccount = async (): Promise<void> => {
     if (
@@ -48,7 +37,7 @@ function Profile() {
     }
 
     try {
-      await api.delete(`/user/${user?.id}`, {
+      await api.delete(`/user/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -65,6 +54,7 @@ function Profile() {
     try {
       setPromoteError("");
       setPromoteLoading(true);
+
       const response = await api.post(
         "/user/promote-admin",
         {},
@@ -74,8 +64,10 @@ function Profile() {
           },
         },
       );
-      setUserInfo(response.data);
+
       authService.updateCurrentUser({ admin: response.data.admin });
+
+      refetch();
     } catch (err: unknown) {
       setPromoteError("Failed to promote to admin");
       console.error(err);
@@ -84,19 +76,21 @@ function Profile() {
     }
   };
 
-  if (loading) {
+  if (loading || !userInfo) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-xl text-gray-600">Loading profile...</div>
+        <div className="text-xl text-gray-600">
+          {loading ? "Loading profile..." : "Profile not found"}
+        </div>
       </div>
     );
   }
 
-  if (error || !userInfo) {
+  if (error) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          {error || "Failed to load profile"}
+          {error}
         </div>
       </div>
     );
@@ -145,6 +139,7 @@ function Profile() {
                   </span>
                 )}
               </p>
+
               {isDev && !userInfo.admin ? (
                 <div className="mt-3">
                   <button
@@ -154,11 +149,11 @@ function Profile() {
                   >
                     {promoteLoading ? "Promoting..." : "Promote to Admin (Dev)"}
                   </button>
-                  {promoteError ? (
+                  {promoteError && (
                     <div className="mt-2 text-sm text-red-600">
                       {promoteError}
                     </div>
-                  ) : null}
+                  )}
                 </div>
               ) : null}
             </div>
@@ -168,15 +163,12 @@ function Profile() {
                 Member Since
               </label>
               <p className="text-lg text-gray-800">
-                {userInfo.createdAt && (
-                  <>
-                    {new Date(userInfo.createdAt).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </>
-                )}
+                {userInfo.createdAt &&
+                  new Date(userInfo.createdAt).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
               </p>
             </div>
           </div>
