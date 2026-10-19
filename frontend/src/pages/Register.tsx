@@ -52,18 +52,23 @@ function Register() {
           Register for Yoga Studio
         </h2>
 
-        {error ? (
+        {/* ✅ Simplification du rendu conditionnel */}
+        {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
             {error}
           </div>
-        ) : null}
+        )}
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
+            <label
+              htmlFor="firstName"
+              className="block text-gray-700 text-sm font-bold mb-2"
+            >
               First Name
             </label>
             <input
+              id="firstName"
               type="text"
               name="firstName"
               value={formData.firstName}
@@ -74,10 +79,14 @@ function Register() {
           </div>
 
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
+            <label
+              htmlFor="lastName"
+              className="block text-gray-700 text-sm font-bold mb-2"
+            >
               Last Name
             </label>
             <input
+              id="lastName"
               type="text"
               name="lastName"
               value={formData.lastName}
@@ -88,10 +97,14 @@ function Register() {
           </div>
 
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
+            <label
+              htmlFor="email"
+              className="block text-gray-700 text-sm font-bold mb-2"
+            >
               Email
             </label>
             <input
+              id="email"
               type="email"
               name="email"
               value={formData.email}
@@ -102,10 +115,14 @@ function Register() {
           </div>
 
           <div className="mb-6">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
+            <label
+              htmlFor="password"
+              className="block text-gray-700 text-sm font-bold mb-2"
+            >
               Password
             </label>
             <input
+              id="password"
               type="password"
               name="password"
               value={formData.password}

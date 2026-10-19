@@ -22,7 +22,6 @@ function SessionForm() {
   const user = authService.getCurrentUser();
   const token = authService.getToken();
 
-  // Redirect if not admin
   useEffect(() => {
     if (!user || !user.admin) {
       navigate("/sessions");
@@ -39,9 +38,7 @@ function SessionForm() {
   const fetchTeachers = async (): Promise<void> => {
     try {
       const response = await api.get<Teacher[]>("/teacher", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
       setTeachers(response.data);
     } catch (err: unknown) {
@@ -52,9 +49,7 @@ function SessionForm() {
   const fetchSession = async (): Promise<void> => {
     try {
       const response = await api.get<Session>(`/session/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
       const session = response.data;
       setFormData({
@@ -74,10 +69,7 @@ function SessionForm() {
   ): void => {
     const value =
       e.target.name === "teacherId" ? parseInt(e.target.value) : e.target.value;
-    setFormData({
-      ...formData,
-      [e.target.name]: value,
-    });
+    setFormData({ ...formData, [e.target.name]: value });
   };
 
   const handleSubmit = async (
@@ -90,15 +82,11 @@ function SessionForm() {
     try {
       if (isEditMode) {
         await api.put(`/session/${id}`, formData, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
       } else {
         await api.post("/session", formData, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
       }
       navigate("/sessions");
@@ -121,18 +109,22 @@ function SessionForm() {
             {isEditMode ? "Edit Session" : "Create New Session"}
           </h1>
 
-          {error ? (
+          {error && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
               {error}
             </div>
-          ) : null}
+          )}
 
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2">
+              <label
+                htmlFor="name"
+                className="block text-gray-700 text-sm font-bold mb-2"
+              >
                 Session Name
               </label>
               <input
+                id="name"
                 type="text"
                 name="name"
                 value={formData.name}
@@ -143,10 +135,14 @@ function SessionForm() {
             </div>
 
             <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2">
+              <label
+                htmlFor="date"
+                className="block text-gray-700 text-sm font-bold mb-2"
+              >
                 Date
               </label>
               <input
+                id="date"
                 type="date"
                 name="date"
                 value={formData.date}
@@ -157,10 +153,14 @@ function SessionForm() {
             </div>
 
             <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2">
+              <label
+                htmlFor="teacherId"
+                className="block text-gray-700 text-sm font-bold mb-2"
+              >
                 Teacher
               </label>
               <select
+                id="teacherId"
                 name="teacherId"
                 value={formData.teacherId ?? ""}
                 onChange={handleChange}
@@ -177,10 +177,14 @@ function SessionForm() {
             </div>
 
             <div className="mb-6">
-              <label className="block text-gray-700 text-sm font-bold mb-2">
+              <label
+                htmlFor="description"
+                className="block text-gray-700 text-sm font-bold mb-2"
+              >
                 Description
               </label>
               <textarea
+                id="description"
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
