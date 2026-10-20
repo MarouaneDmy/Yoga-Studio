@@ -5,7 +5,6 @@ import { MemoryRouter } from "react-router-dom";
 import Login from "./Login";
 import { authService } from "../services/auth.service";
 
-// 1. Mock de react-router-dom
 const mockNavigate = vi.fn();
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom");
@@ -15,7 +14,6 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
-// 2. Mock du service d'authentification
 vi.mock("../services/auth.service", () => ({
   authService: {
     login: vi.fn(),
@@ -27,7 +25,6 @@ describe("Page Login", () => {
     vi.clearAllMocks();
   });
 
-  // Helper pour le rendu
   const renderLogin = () => {
     return render(
       <MemoryRouter>
@@ -63,7 +60,6 @@ describe("Page Login", () => {
     it("appelle authService.login avec les bonnes données et redirige vers /sessions", async () => {
       const user = userEvent.setup();
 
-      // On simule une réussite de l'API
       (authService.login as ReturnType<typeof vi.fn>).mockResolvedValue({});
 
       renderLogin();
@@ -72,12 +68,10 @@ describe("Page Login", () => {
       const passwordInput = screen.getByLabelText(/password/i);
       const submitButton = screen.getByRole("button", { name: /login/i });
 
-      // Simulation de la saisie utilisateur
       await user.type(emailInput, "test@yoga.com");
       await user.type(passwordInput, "supersecret");
       await user.click(submitButton);
 
-      // Vérifications
       expect(authService.login).toHaveBeenCalledTimes(1);
       expect(authService.login).toHaveBeenCalledWith({
         email: "test@yoga.com",
@@ -91,7 +85,6 @@ describe("Page Login", () => {
     it("désactive le bouton et affiche 'Loading...' pendant la requête", async () => {
       const user = userEvent.setup();
 
-      // On simule une requête qui ne se termine jamais pour tester l'état loading
       (authService.login as ReturnType<typeof vi.fn>).mockImplementation(
         () => new Promise(() => {}),
       );
@@ -116,7 +109,6 @@ describe("Page Login", () => {
       const user = userEvent.setup();
       const apiErrorMessage = "Invalid credentials";
 
-      // On simule une erreur Axios comme le ferait le vrai service
       const mockAxiosError = {
         isAxiosError: true,
         response: { data: { message: apiErrorMessage } },
@@ -135,17 +127,14 @@ describe("Page Login", () => {
       await user.type(passwordInput, "wrongpassword");
       await user.click(submitButton);
 
-      // findByText est asynchrone et attend que l'élément apparaisse dans le DOM
       expect(await screen.findByText(apiErrorMessage)).toBeInTheDocument();
 
-      // On vérifie qu'on n'a PAS été redirigé
       expect(mockNavigate).not.toHaveBeenCalled();
     });
 
     it("affiche un message d'erreur générique si l'erreur n'est pas une AxiosError", async () => {
       const user = userEvent.setup();
 
-      // On simule une erreur standard (non-Axios)
       (authService.login as ReturnType<typeof vi.fn>).mockRejectedValue(
         new Error("Network error"),
       );

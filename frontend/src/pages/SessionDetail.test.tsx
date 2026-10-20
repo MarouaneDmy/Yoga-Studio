@@ -7,7 +7,6 @@ import { useFetch } from "../hooks/useFetch";
 import { authService } from "../services/auth.service";
 import api from "../services/api";
 
-// 1. Mock de react-router-dom
 const mockNavigate = vi.fn();
 let mockParams = { id: "1" };
 
@@ -20,10 +19,8 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
-// 2. Mock du hook useFetch
 vi.mock("../hooks/useFetch");
 
-// 3. Mock des services
 vi.mock("../services/auth.service", () => ({
   authService: {
     getCurrentUser: vi.fn(),
@@ -33,14 +30,13 @@ vi.mock("../services/auth.service", () => ({
 
 vi.mock("../services/api");
 
-// Données mockées réutilisables
 const mockSession = {
   id: 1,
   name: "Yoga Vinyasa",
   date: "2024-12-01T10:00:00.000Z",
   description: "A dynamic class",
   teacher: { id: 1, firstName: "Margot", lastName: "Delahaye" },
-  users: [2, 3], // Les utilisateurs 2 et 3 participent
+  users: [2, 3],
   createdAt: "2024-01-01",
   updatedAt: "2024-01-01",
 };
@@ -52,7 +48,6 @@ describe("Page SessionDetail", () => {
     vi.clearAllMocks();
     mockParams = { id: "1" };
 
-    // Configuration par défaut du hook useFetch
     vi.mocked(useFetch).mockReturnValue({
       data: mockSession,
       loading: false,
@@ -104,7 +99,7 @@ describe("Page SessionDetail", () => {
   describe("Affichage pour un Utilisateur Standard (Non participant)", () => {
     beforeEach(() => {
       vi.mocked(authService.getCurrentUser).mockReturnValue({
-        id: 1, // L'ID 1 n'est PAS dans le tableau mockSession.users [2, 3]
+        id: 1,
         email: "user@test.com",
         firstName: "John",
         lastName: "Doe",
@@ -163,7 +158,7 @@ describe("Page SessionDetail", () => {
   describe("Affichage pour un Utilisateur Standard (Déjà participant)", () => {
     beforeEach(() => {
       vi.mocked(authService.getCurrentUser).mockReturnValue({
-        id: 2, // L'ID 2 EST dans le tableau mockSession.users [2, 3]
+        id: 2,
         email: "user@test.com",
         firstName: "John",
         lastName: "Doe",
@@ -227,7 +222,6 @@ describe("Page SessionDetail", () => {
       const user = userEvent.setup();
       vi.mocked(api.delete).mockResolvedValue({ data: {} });
 
-      // Mock de window.confirm pour qu'il retourne true (l'utilisateur clique sur "OK")
       vi.spyOn(window, "confirm").mockReturnValue(true);
 
       renderSessionDetail();
@@ -245,7 +239,7 @@ describe("Page SessionDetail", () => {
 
     it("n'appelle PAS l'API si l'utilisateur annule la suppression", async () => {
       const user = userEvent.setup();
-      vi.spyOn(window, "confirm").mockReturnValue(false); // L'utilisateur clique sur "Annuler"
+      vi.spyOn(window, "confirm").mockReturnValue(false);
 
       renderSessionDetail();
 

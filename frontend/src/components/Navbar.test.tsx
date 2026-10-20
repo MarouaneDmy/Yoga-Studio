@@ -2,10 +2,9 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { MemoryRouter } from "react-router-dom";
-import Navbar from "./Navbar"; // Ajuste le chemin si nécessaire
-import { authService } from "../services/auth.service"; // Ajuste le chemin si nécessaire
+import Navbar from "./Navbar";
+import { authService } from "../services/auth.service";
 
-// 1. Mock de react-router-dom
 const mockNavigate = vi.fn();
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom");
@@ -15,7 +14,6 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
-// 2. Mock du service d'authentification
 vi.mock("../services/auth.service", () => ({
   authService: {
     getCurrentUser: vi.fn(),
@@ -29,7 +27,6 @@ describe("Navbar", () => {
     vi.clearAllMocks();
   });
 
-  // Helper pour rendre le composant dans un Router
   const renderNavbar = () => {
     return render(
       <MemoryRouter>
@@ -40,7 +37,6 @@ describe("Navbar", () => {
 
   describe("Quand l'utilisateur n'est PAS connecté", () => {
     beforeEach(() => {
-      // ✅ Correction : Cast explicite pour que Vitest reconnaisse mockReturnValue
       (authService.isAuthenticated as ReturnType<typeof vi.fn>).mockReturnValue(
         false,
       );

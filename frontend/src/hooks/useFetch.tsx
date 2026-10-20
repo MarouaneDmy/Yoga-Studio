@@ -4,7 +4,7 @@ import { authService } from "../services/auth.service";
 
 interface UseFetchOptions {
   url: string;
-  dependencies?: any[]; // Tableau de dépendances pour déclencher le re-fetch
+  dependencies?: any[];
 }
 
 interface UseFetchReturn<T> {

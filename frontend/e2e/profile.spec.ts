@@ -1,12 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 
-// ⚠️ À adapter si besoin
 const PROFILE_URL = "/profile";
 
-// Le bouton "Promote to Admin (Dev)" n'existe que si import.meta.env.DEV est vrai
-// (front servi par `vite`). On détecte le mode à l'exécution : le serveur de dev
-// Vite expose /@vite/client en JavaScript, alors qu'un build/preview renvoie
-// index.html (fallback SPA, content-type text/html).
 async function isViteDevServer(page: Page): Promise<boolean> {
   const res = await page.request.get("/@vite/client");
   return (
@@ -17,9 +12,6 @@ async function isViteDevServer(page: Page): Promise<boolean> {
 const ADMIN = { email: "yoga@studio.com", password: "test!1234" };
 const USER = { email: "user@test.com", password: "test!1234" };
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 async function login(
   page: Page,
   { email, password }: { email: string; password: string },
@@ -31,7 +23,6 @@ async function login(
   await page.waitForURL(/\/sessions/);
 }
 
-// Crée un utilisateur jetable (évite de modifier/supprimer les comptes du seed)
 async function registerFreshUser(page: Page) {
   const creds = {
     firstName: "Jane",
@@ -61,16 +52,11 @@ async function goToProfile(page: Page) {
   await expect(page.getByRole("heading", { name: "My Profile" })).toBeVisible();
 }
 
-// Les <label> du composant ne sont pas liés à un input (pas de htmlFor) :
-// on lit donc le <p> qui suit le label.
 const fieldValue = (page: Page, label: string) =>
   page
     .getByText(label, { exact: true })
     .locator("xpath=following-sibling::p[1]");
 
-// ---------------------------------------------------------------------------
-// Utilisateur "normal"
-// ---------------------------------------------------------------------------
 test.describe("Page Profile : utilisateur standard", () => {
   test("affiche les informations du profil avec le badge User", async ({
     page,
@@ -82,13 +68,11 @@ test.describe("Page Profile : utilisateur standard", () => {
     await expect(fieldValue(page, "First Name")).not.toBeEmpty();
     await expect(fieldValue(page, "Last Name")).not.toBeEmpty();
 
-    // Badge de type de compte
     await expect(fieldValue(page, "Account Type")).toHaveText("User");
     await expect(page.getByText("Administrator", { exact: true })).toHaveCount(
       0,
     );
 
-    // Date formatée en anglais : "December 1, 2026"
     await expect(fieldValue(page, "Member Since")).toHaveText(
       /^[A-Z][a-z]+ \d{1,2}, \d{4}$/,
     );
@@ -113,10 +97,6 @@ test.describe("Page Profile : utilisateur standard", () => {
     ).toBeVisible();
   });
 
-  // ⚠️ Ce test révèle un bug de Profile.tsx : `if (loading || !userInfo)` est
-  // évalué AVANT `if (error)`. En cas d'erreur API, userInfo vaut null et le
-  // composant affiche "Profile not found" au lieu du message d'erreur.
-  // Corrige l'ordre des conditions puis retire `fixme`.
   test.fixme("affiche le message d'erreur si l'API échoue", async ({
     page,
   }) => {
@@ -166,9 +146,6 @@ test.describe("Page Profile : utilisateur standard", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// Promotion admin (mode dev uniquement) : utilisateur jetable
-// ---------------------------------------------------------------------------
 test.describe("Page Profile : promotion admin (dev)", () => {
   test.beforeEach(async ({ page }) => {
     test.skip(
@@ -224,9 +201,6 @@ test.describe("Page Profile : promotion admin (dev)", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// Administrateur
-// ---------------------------------------------------------------------------
 test.describe("Page Profile : administrateur", () => {
   test.beforeEach(async ({ page }) => {
     await login(page, ADMIN);
@@ -248,9 +222,6 @@ test.describe("Page Profile : administrateur", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// Suppression de compte (utilisateur jetable)
-// ---------------------------------------------------------------------------
 test.describe("Page Profile : suppression de compte", () => {
   test("annuler la confirmation ne supprime rien", async ({ page }) => {
     await registerFreshUser(page);
@@ -293,7 +264,6 @@ test.describe("Page Profile : suppression de compte", () => {
 
     await expect(page).toHaveURL("/login");
 
-    // Le compte n'existe plus : la reconnexion échoue
     await page.getByLabel("Email").fill(creds.email);
     await page.getByLabel("Password").fill(creds.password);
     await page.getByRole("button", { name: "Login" }).click();
@@ -315,7 +285,6 @@ test.describe("Page Profile : suppression de compte", () => {
       }
     });
 
-    // 1er dialog : confirm, 2e dialog : alert("Failed to delete account")
     const messages: string[] = [];
     page.on("dialog", async (dialog) => {
       messages.push(dialog.message());

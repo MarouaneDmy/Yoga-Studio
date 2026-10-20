@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { authService } from "../services/auth.service";
 import { User } from "../types";
-import { useFetch } from "../hooks/useFetch"; // ✅ 1. Import du hook
+import { useFetch } from "../hooks/useFetch";
 
 function Profile() {
   const navigate = useNavigate();

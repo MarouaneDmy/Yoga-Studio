@@ -7,10 +7,8 @@ import { useFetch } from "../hooks/useFetch";
 import { authService } from "../services/auth.service";
 import api from "../services/api";
 
-// 1. Mock du hook useFetch
 vi.mock("../hooks/useFetch");
 
-// 2. Mock des services
 vi.mock("../services/auth.service", () => ({
   authService: {
     getCurrentUser: vi.fn(),
@@ -20,7 +18,6 @@ vi.mock("../services/auth.service", () => ({
 
 vi.mock("../services/api");
 
-// Données mockées réutilisables
 const mockSessions = [
   {
     id: 1,
@@ -50,7 +47,6 @@ describe("Page Sessions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Configuration par défaut du hook useFetch
     vi.mocked(useFetch).mockReturnValue({
       data: mockSessions,
       loading: false,
@@ -141,7 +137,6 @@ describe("Page Sessions", () => {
     it("affiche toutes les sessions avec leurs détails", () => {
       renderSessions();
 
-      // Vérifie que les deux sessions sont affichées
       expect(
         screen.getByRole("heading", { name: /yoga vinyasa/i }),
       ).toBeInTheDocument();
@@ -149,12 +144,10 @@ describe("Page Sessions", () => {
         screen.getByRole("heading", { name: /yoga hatha/i }),
       ).toBeInTheDocument();
 
-      // Vérifie les détails de la première session
       expect(screen.getByText(/margot delahaye/i)).toBeInTheDocument();
       expect(screen.getByText(/participants: 2/i)).toBeInTheDocument();
       expect(screen.getByText(/a dynamic class/i)).toBeInTheDocument();
 
-      // Vérifie les détails de la deuxième session
       expect(screen.getByText(/david martin/i)).toBeInTheDocument();
       expect(screen.getByText(/participants: 1/i)).toBeInTheDocument();
       expect(screen.getByText(/a gentle class/i)).toBeInTheDocument();
@@ -222,7 +215,7 @@ describe("Page Sessions", () => {
       renderSessions();
 
       const deleteButtons = screen.getAllByRole("button", { name: /delete/i });
-      await user.click(deleteButtons[0]); // Supprime la première session (id: 1)
+      await user.click(deleteButtons[0]);
 
       expect(window.confirm).toHaveBeenCalledWith(
         "Are you sure you want to delete this session?",
@@ -263,7 +256,6 @@ describe("Page Sessions", () => {
       vi.mocked(api.delete).mockRejectedValue(new Error("Network error"));
       vi.spyOn(window, "confirm").mockReturnValue(true);
 
-      // Mock de window.alert pour éviter qu'il bloque le test
       const alertMock = vi.spyOn(window, "alert").mockImplementation(() => {});
 
       renderSessions();

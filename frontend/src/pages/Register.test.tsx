@@ -5,7 +5,6 @@ import { MemoryRouter } from "react-router-dom";
 import Register from "./Register";
 import { authService } from "../services/auth.service";
 
-// 1. Mock de react-router-dom
 const mockNavigate = vi.fn();
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom");
@@ -15,7 +14,6 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
-// 2. Mock du service d'authentification
 vi.mock("../services/auth.service", () => ({
   authService: {
     register: vi.fn(),
@@ -91,7 +89,6 @@ describe("Page Register", () => {
     it("désactive le bouton et affiche 'Registering...' pendant la requête", async () => {
       const user = userEvent.setup();
 
-      // Simule une requête qui ne se termine jamais
       (authService.register as ReturnType<typeof vi.fn>).mockImplementation(
         () => new Promise(() => {}),
       );
@@ -100,7 +97,6 @@ describe("Page Register", () => {
 
       await user.type(screen.getByLabelText(/email/i), "test@yoga.com");
       await user.type(screen.getByLabelText(/password/i), "password123");
-      // On remplit vite fait les autres pour que le formulaire soit valide (required)
       await user.type(screen.getByLabelText(/first name/i), "Test");
       await user.type(screen.getByLabelText(/last name/i), "User");
 

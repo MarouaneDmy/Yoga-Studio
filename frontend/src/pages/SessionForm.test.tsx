@@ -6,20 +6,18 @@ import SessionForm from "./SessionForm";
 import api from "../services/api";
 import { authService } from "../services/auth.service";
 
-// 1. Mock de react-router-dom
 const mockNavigate = vi.fn();
-let mockParams: { id?: string } = {}; // Variable mutable pour simuler différents IDs
+let mockParams: { id?: string } = {};
 
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom");
   return {
     ...actual,
     useNavigate: () => mockNavigate,
-    useParams: () => mockParams, // Retourne notre variable mutable
+    useParams: () => mockParams,
   };
 });
 
-// 2. Mock des services
 vi.mock("../services/api");
 vi.mock("../services/auth.service", () => ({
   authService: {
@@ -31,7 +29,7 @@ vi.mock("../services/auth.service", () => ({
 describe("Page SessionForm", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockParams = {}; // Reset des params avant chaque test
+    mockParams = {};
     (authService.getCurrentUser as ReturnType<typeof vi.fn>).mockReturnValue({
       id: 1,
       email: "admin@yoga.com",
@@ -66,7 +64,7 @@ describe("Page SessionForm", () => {
 
   describe("Mode Création (Create)", () => {
     beforeEach(() => {
-      mockParams = {}; // Pas d'ID = mode création
+      mockParams = {};
       (api.get as ReturnType<typeof vi.fn>).mockResolvedValue({
         data: [
           { id: 1, firstName: "Margot", lastName: "Delahaye" },
@@ -82,7 +80,6 @@ describe("Page SessionForm", () => {
         screen.getByRole("heading", { name: /create new session/i }),
       ).toBeInTheDocument();
 
-      // Attendre que les professeurs soient chargés
       await waitFor(() => {
         expect(
           screen.getByRole("option", { name: /margot delahaye/i }),
@@ -105,7 +102,7 @@ describe("Page SessionForm", () => {
 
       await user.type(screen.getByLabelText(/session name/i), "Yoga Vinyasa");
       await user.type(screen.getByLabelText(/date/i), "2024-12-01");
-      await user.selectOptions(screen.getByLabelText(/teacher/i), "1"); // Sélection par value
+      await user.selectOptions(screen.getByLabelText(/teacher/i), "1");
       await user.type(screen.getByLabelText(/description/i), "Super cours");
 
       await user.click(screen.getByRole("button", { name: /create session/i }));
@@ -116,7 +113,7 @@ describe("Page SessionForm", () => {
           name: "Yoga Vinyasa",
           date: "2024-12-01",
           description: "Super cours",
-          teacherId: 1, // Vérifie que le parseInt a fonctionné
+          teacherId: 1,
         },
         expect.objectContaining({
           headers: expect.objectContaining({
@@ -131,9 +128,8 @@ describe("Page SessionForm", () => {
 
   describe("Mode Édition (Edit)", () => {
     beforeEach(() => {
-      mockParams = { id: "42" }; // Simule /sessions/edit/42
+      mockParams = { id: "42" };
 
-      // Mock pour la liste des profs
       (api.get as ReturnType<typeof vi.fn>).mockImplementation(
         (url: string) => {
           if (url === "/teacher") {
@@ -167,9 +163,9 @@ describe("Page SessionForm", () => {
         expect(screen.getByLabelText(/session name/i)).toHaveValue(
           "Yoga Hatha",
         );
-        expect(screen.getByLabelText(/date/i)).toHaveValue("2024-11-15"); // Vérifie le formatage de la date
+        expect(screen.getByLabelText(/date/i)).toHaveValue("2024-11-15");
         expect(screen.getByLabelText(/description/i)).toHaveValue("Cours doux");
-        expect(screen.getByLabelText(/teacher/i)).toHaveValue("1"); // Vérifie que le bon prof est sélectionné
+        expect(screen.getByLabelText(/teacher/i)).toHaveValue("1");
       });
     });
 
@@ -181,7 +177,6 @@ describe("Page SessionForm", () => {
 
       await waitFor(() => screen.getByLabelText(/session name/i));
 
-      // On modifie juste le nom pour tester l'update
       await user.clear(screen.getByLabelText(/session name/i));
       await user.type(
         screen.getByLabelText(/session name/i),

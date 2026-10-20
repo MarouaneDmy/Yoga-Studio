@@ -2,7 +2,6 @@ import { renderHook, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useFetch } from "../useFetch";
 import api from "../../services/api";
-import { authService } from "../../services/auth.service";
 
 vi.mock("../../services/api");
 vi.mock("../../services/auth.service", () => ({
@@ -24,11 +23,9 @@ describe("useFetch", () => {
       useFetch({ url: "/test", dependencies: [] }),
     );
 
-    // État initial
     expect(result.current.loading).toBe(true);
     expect(result.current.data).toBeNull();
 
-    // Attendre que le fetch se termine
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
@@ -71,7 +68,6 @@ describe("useFetch", () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.data).toEqual(mockData1);
 
-    // Appeler refetch
     result.current.refetch();
 
     await waitFor(() => {

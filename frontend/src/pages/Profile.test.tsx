@@ -7,10 +7,6 @@ import { useFetch } from "../hooks/useFetch";
 import { authService } from "../services/auth.service";
 import api from "../services/api";
 
-// ==========================================
-// 1. TOUS LES MOCKS DOIVENT ÊTRE STRICTEMENT AU NIVEAU SUPÉRIEUR
-// ==========================================
-
 vi.mock("../hooks/useFetch");
 
 vi.mock("../services/auth.service", () => ({
@@ -33,10 +29,6 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
-// ==========================================
-// 2. DONNÉES MOCKÉES
-// ==========================================
-
 const mockUser = {
   id: 1,
   email: "john@yoga.com",
@@ -52,13 +44,9 @@ const mockAdminUser = {
   id: 2,
   email: "admin@yoga.com",
   firstName: "Admin",
-  lastName: "Smith", // ✅ Changé de "User" à "Smith" pour éviter les conflits de texte
+  lastName: "Smith",
   admin: true,
 };
-
-// ==========================================
-// 3. TESTS
-// ==========================================
 
 describe("Page Profile", () => {
   const mockRefetch = vi.fn();
@@ -110,7 +98,6 @@ describe("Page Profile", () => {
       });
 
       renderProfile();
-      // ✅ Le composant affiche "Profile not found" car !userInfo est vrai avant de vérifier l'erreur
       expect(screen.getByText(/profile not found/i)).toBeInTheDocument();
     });
   });
@@ -123,7 +110,6 @@ describe("Page Profile", () => {
         screen.getByRole("heading", { name: /my profile/i }),
       ).toBeInTheDocument();
 
-      // ✅ Utilisation de chaînes exactes au lieu de regex pour éviter les doublons (ex: "John" vs "john@yoga.com")
       expect(screen.getByText("John")).toBeInTheDocument();
       expect(screen.getByText("Doe")).toBeInTheDocument();
       expect(screen.getByText("john@yoga.com")).toBeInTheDocument();
@@ -151,7 +137,6 @@ describe("Page Profile", () => {
     it("affiche le badge Administrator", () => {
       renderProfile();
       expect(screen.getByText(/administrator/i)).toBeInTheDocument();
-      // ✅ Vérifie que le badge "User" (exact) n'est pas présent
       expect(
         screen.queryByText("User", { exact: true }),
       ).not.toBeInTheDocument();
