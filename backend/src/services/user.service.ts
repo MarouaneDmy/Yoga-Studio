@@ -12,15 +12,7 @@ export class UserService {
       throw new AppError("User not found", 404);
     }
 
-    return {
-      id: user.id,
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      admin: user.admin,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    };
+    return user;
   }
 
   async delete(id: number, authenticatedUserId: number) {
@@ -63,15 +55,7 @@ export class UserService {
     }
 
     if (user.admin) {
-      return {
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        admin: user.admin,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-      };
+      return user;
     }
 
     const updatedUser = await prisma.user.update({
@@ -79,15 +63,7 @@ export class UserService {
       data: { admin: true },
     });
 
-    return {
-      id: updatedUser.id,
-      email: updatedUser.email,
-      firstName: updatedUser.firstName,
-      lastName: updatedUser.lastName,
-      admin: updatedUser.admin,
-      createdAt: updatedUser.createdAt,
-      updatedAt: updatedUser.updatedAt,
-    };
+    return updatedUser;
   }
 }
 
