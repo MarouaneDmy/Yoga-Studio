@@ -1,4 +1,3 @@
-// src/controllers/session.controller.ts
 import { Response } from "express";
 import { sessionService } from "../services/session.service";
 import { catchAsync } from "../utils/catchAsync";

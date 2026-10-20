@@ -1,4 +1,3 @@
-// src/services/user.service.ts
 import { prisma } from "../utils/prisma";
 import { AppError } from "../utils/AppError";
 

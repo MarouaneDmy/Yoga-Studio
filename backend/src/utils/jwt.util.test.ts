@@ -2,7 +2,6 @@ import jwt from "jsonwebtoken";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { generateToken, verifyToken } from "./jwt.util";
 
-// Doit correspondre à `test.env.JWT_SECRET` dans vitest.config.ts
 const SECRET = "test-secret";
 
 afterEach(() => {

@@ -1,4 +1,3 @@
-// src/services/session.service.ts
 import { prisma } from "../utils/prisma";
 import { AppError } from "../utils/AppError";
 
@@ -9,7 +8,7 @@ export class SessionService {
         teacher: true,
         participants: { include: { user: true } },
       },
-      orderBy: { date: "asc" }, // Bonus : trier par date
+      orderBy: { date: "asc" },
     });
 
     return sessions.map((session) => ({
@@ -123,7 +122,6 @@ export class SessionService {
       updateData.teacherId = data.teacherId;
     }
 
-    // Si rien à mettre à jour, on évite un appel DB inutile (optionnel mais propre)
     if (Object.keys(updateData).length === 0) {
       return this.getById(id);
     }

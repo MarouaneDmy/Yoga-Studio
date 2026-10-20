@@ -38,9 +38,6 @@ describe("catchAsync", () => {
     await vi.waitFor(() => expect(next).toHaveBeenCalledWith(error));
   });
 
-  // Documente une limite actuelle : une exception SYNCHRONE levée avant tout
-  // await n'est pas captée (fn(...) est évalué avant Promise.resolve).
-  // Sans impact avec des controllers async, mais bon à savoir.
   it("ne capte pas une exception synchrone du handler", () => {
     const { req, res, next } = makeArgs();
     const handler = () => {

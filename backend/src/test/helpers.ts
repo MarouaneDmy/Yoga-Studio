@@ -20,10 +20,7 @@ export const makeRes = () => {
 
 type Handler = (req: any, res: any, next: any) => void;
 
-/**
- * Exécute un handler enveloppé par catchAsync (qui ne retourne pas de promesse)
- * puis laisse la chaîne de promesses se terminer avant de rendre la main.
- */
+// Exécute un handler enveloppé par catchAsync (qui ne retourne pas de promesse) puis laisse la chaîne de promesses se terminer avant de rendre la main
 export async function runHandler(
   handler: Handler,
   req: Record<string, unknown> = {},

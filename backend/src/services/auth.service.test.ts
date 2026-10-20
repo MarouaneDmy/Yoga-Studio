@@ -35,7 +35,6 @@ const expectedPublicUser = {
   token: "jwt-token",
 };
 
-// Vérifie le type de l'erreur, son status HTTP et son message
 const expectAppError = async (
   promise: Promise<unknown>,
   statusCode: number,

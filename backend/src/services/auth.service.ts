@@ -1,4 +1,3 @@
-// src/services/auth.service.ts
 import { prisma } from "../utils/prisma";
 import { AppError } from "../utils/AppError";
 import * as bcrypt from "bcrypt";

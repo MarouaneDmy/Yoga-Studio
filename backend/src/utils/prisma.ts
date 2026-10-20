@@ -1,6 +1,5 @@
 import { PrismaClient } from "@prisma/client";
 
-// Astuce pour éviter les multiples instances de Prisma lors du hot-reload (nodemon)
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
 
 export const prisma =

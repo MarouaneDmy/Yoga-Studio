@@ -35,9 +35,6 @@ const participationFindUnique = vi.mocked(
 const participationCreate = vi.mocked(prisma.sessionParticipation.create);
 const participationDelete = vi.mocked(prisma.sessionParticipation.delete);
 
-// ---------------------------------------------------------------------------
-// Fixtures
-// ---------------------------------------------------------------------------
 const createdAt = new Date("2026-01-01T10:00:00Z");
 const updatedAt = new Date("2026-01-02T10:00:00Z");
 const sessionDate = new Date("2026-12-01T00:00:00Z");
@@ -80,7 +77,6 @@ const compositeKey = (sessionId: number, userId: number) => ({
   where: { sessionId_userId: { sessionId, userId } },
 });
 
-// ---------------------------------------------------------------------------
 describe("SessionService", () => {
   const service = new SessionService();
 

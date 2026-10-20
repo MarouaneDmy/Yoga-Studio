@@ -75,7 +75,6 @@ describe("UserService", () => {
 
   describe("promoteSelfToAdmin", () => {
     describe("hors développement", () => {
-      // Vitest force NODE_ENV="test" : la promotion est donc refusée par défaut
       it.each(["test", "production"])(
         "rejette en 403 quand NODE_ENV vaut %s",
         async (env) => {
@@ -93,7 +92,7 @@ describe("UserService", () => {
 
     describe("en développement", () => {
       it("considère l'environnement comme dev quand NODE_ENV n'est pas défini", async () => {
-        vi.stubEnv("NODE_ENV", "placeholder"); // pour que Vitest restaure la valeur d'origine
+        vi.stubEnv("NODE_ENV", "placeholder");
         delete process.env.NODE_ENV;
         findUnique.mockResolvedValue(dbUser as never);
         update.mockResolvedValue({ ...dbUser, admin: true } as never);

@@ -19,7 +19,7 @@ const dbTeacher = (id: number, firstName: string, lastName: string) => ({
   lastName,
   createdAt,
   updatedAt,
-  internalField: "ne doit pas être exposé", // vérifie que le mapping filtre
+  internalField: "ne doit pas être exposé",
 });
 
 const publicTeacher = (id: number, firstName: string, lastName: string) => ({
