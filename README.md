@@ -1,91 +1,68 @@
-# Yoga Studio Management System
+# Yoga Studio
 
-A full-stack web application for managing yoga studio operations, including session scheduling, teacher management, and user registrations.
+Application web full-stack de gestion d'un studio de yoga : planning des sessions, professeurs et inscriptions des utilisateurs.
 
-## Tech Stack
+## Sommaire
 
-### Backend
-- Node.js 22 LTS
-- Express.js 4.x
-- TypeScript 5.4+ (Strict Mode)
-- Prisma ORM
-- PostgreSQL 16
-- Zod (validation)
-- JWT (authentication)
-- bcrypt (password hashing)
+1. [Stack technique](#stack-technique)
+2. [Fonctionnalités](#fonctionnalités)
+3. [Installation](#installation)
+4. [Utilisation](#utilisation)
+5. [Lancer les tests](#lancer-les-tests)
+6. [Générer les rapports de couverture](#générer-les-rapports-de-couverture)
+7. [API](#api)
+8. [Structure du projet](#structure-du-projet)
+9. [Dépannage](#dépannage)
 
-### Frontend
-- React 19 (Hooks only)
-- TypeScript 5.9+ (Strict Mode)
-- Vite 7.x
-- TailwindCSS 4.x
-- React Router 6.x
-- Axios
+## Stack technique
 
-### Infrastructure
-- Docker + Docker Compose
-- PostgreSQL container
+**Backend** : Node.js 22 LTS, Express 4, TypeScript (strict), Prisma, PostgreSQL 16, JWT, bcrypt
 
-## Features
+**Frontend** : React 19, TypeScript (strict), Vite 7, TailwindCSS 4, React Router 6, Axios
 
-### Authentication
-- User registration
-- User login with JWT tokens
+**Tests** : Vitest, React Testing Library, Playwright, `@vitest/coverage-v8`
 
-### Sessions Management
-- List all yoga sessions
-- View session details
-- Create new sessions (admin only)
-- Update sessions (admin only)
-- Delete sessions (admin only)
-- Join/leave sessions (regular users)
+**Infrastructure** : Docker + Docker Compose (conteneur PostgreSQL)
 
-### Teachers
-- View list of teachers
-- View teacher details
+## Fonctionnalités
 
-### User Profile
-- View user profile
-- Delete user account
-
-## Prerequisites
-
-- Node.js 22 LTS or higher
-- Docker and Docker Compose
-- npm or yarn
+- **Authentification** : inscription et connexion (JWT).
+- **Sessions** : liste, détail, création / modification / suppression (administrateur), inscription et désinscription (utilisateur).
+- **Professeurs** : liste et détail.
+- **Profil** : consultation et suppression de son compte.
 
 ## Installation
 
-### 1. Clone the repository
+### Prérequis
+
+- Node.js 22 LTS ou supérieur
+- npm
+- Docker et Docker Compose
+
+### 1. Cloner le dépôt
 
 ```bash
-cd p4-dfsjs-starter
+git clone https://github.com/MarouaneDmy/Yoga-Studio.git
+cd Yoga-Studio
 ```
 
-### 2. Install Backend Dependencies
+### 2. Installer les dépendances
 
 ```bash
-cd backend
-npm install
+cd backend && npm install
+cd ../frontend && npm install
 ```
 
-### 3. Install Frontend Dependencies
+### 3. Configurer les variables d'environnement
 
-```bash
-cd ../frontend
-npm install
-```
-
-### 4. Set up Environment Variables
-
-Create a `.env` file in the `backend` directory:
+Dans `backend/`, créer le fichier `.env` à partir de l'exemple :
 
 ```bash
 cd ../backend
 cp .env.example .env
 ```
 
-The default configuration should work with Docker Compose:
+Valeurs par défaut (compatibles avec le `docker-compose.yml`) :
 
 ```env
 DATABASE_URL="postgresql://yogauser:yogapass@localhost:5432/yogastudio"
@@ -94,237 +71,258 @@ PORT=8080
 NODE_ENV=development
 ```
 
-### 5. Start PostgreSQL with Docker
+> `NODE_ENV=development` est nécessaire pour le bouton « Promote to Admin (Dev) » de la page profil.
 
-From the project root:
+### 4. Démarrer PostgreSQL
+
+Depuis la racine du projet :
 
 ```bash
 docker-compose up -d
 ```
 
-This will start a PostgreSQL container on port 5432.
-
-### 6. Run Database Migrations
+### 5. Créer la base et insérer les données de démonstration
 
 ```bash
 cd backend
 npm run prisma:migrate
-```
-
-### 7. Seed the Database
-
-```bash
 npm run prisma:seed
 ```
 
-This will create:
-- 1 admin user: `yoga@studio.com` / `test!1234`
-- 1 regular user: `user@test.com` / `test!1234`
-- 3 teachers
-- 4 yoga sessions
+Le seed crée :
 
-## Running the Application
+| Type           | Identifiant       | Mot de passe |
+| -------------- | ----------------- | ------------ |
+| Administrateur | `yoga@studio.com` | `test!1234`  |
+| Utilisateur    | `user@test.com`   | `test!1234`  |
 
-### Start the Backend (Terminal 1)
+ainsi que 3 professeurs et 4 sessions.
+
+## Utilisation
+
+Lancer le backend (terminal 1) :
 
 ```bash
 cd backend
 npm run dev
 ```
 
-The API will run on `http://localhost:8080`
+L'API est disponible sur `http://localhost:8080` (vérification : `GET /api/health`).
 
-### Start the Frontend (Terminal 2)
+Lancer le frontend (terminal 2) :
 
 ```bash
 cd frontend
 npm run dev
 ```
 
-The frontend will run on `http://localhost:3000`
+L'application est disponible sur `http://localhost:3000`. Connectez-vous avec l'un des comptes ci-dessus, ou créez un compte via la page d'inscription.
 
-## Default Credentials
+| Rôle           | Ce que l'on peut faire                                                                               |
+| -------------- | ---------------------------------------------------------------------------------------------------- |
+| Utilisateur    | Consulter les sessions et professeurs, rejoindre / quitter une session, voir et supprimer son profil |
+| Administrateur | Tout ce qui précède, plus créer, modifier et supprimer des sessions                                  |
 
-**Admin User:**
-- Email: `yoga@studio.com`
-- Password: `test!1234`
+### Autres scripts
 
-**Regular User:**
-- Email: `user@test.com`
-- Password: `test!1234`
-
-## API Endpoints
-
-### Authentication
-- `POST /api/auth/register` - Register a new user
-- `POST /api/auth/login` - Login and get JWT token
-
-### Sessions
-- `GET /api/session` - Get all sessions (protected)
-- `GET /api/session/:id` - Get session by ID (protected)
-- `POST /api/session` - Create session (admin only)
-- `PUT /api/session/:id` - Update session (admin only)
-- `DELETE /api/session/:id` - Delete session (admin only)
-- `POST /api/session/:id/participate/:userId` - Join session (protected)
-- `DELETE /api/session/:id/participate/:userId` - Leave session (protected)
-
-### Teachers
-- `GET /api/teacher` - Get all teachers (protected)
-- `GET /api/teacher/:id` - Get teacher by ID (protected)
-
-### Users
-- `GET /api/user/:id` - Get user by ID (protected)
-- `DELETE /api/user/:id` - Delete user account (protected)
-
-## Database Schema
-
-```prisma
-model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  firstName String
-  lastName  String
-  password  String
-  admin     Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  sessions  SessionParticipation[]
-}
-
-model Teacher {
-  id        Int      @id @default(autoincrement())
-  firstName String
-  lastName  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  sessions  Session[]
-}
-
-model Session {
-  id          Int       @id @default(autoincrement())
-  name        String
-  date        DateTime
-  description String
-  teacherId   Int
-  teacher     Teacher   @relation(fields: [teacherId], references: [id])
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  participants SessionParticipation[]
-}
-
-model SessionParticipation {
-  sessionId Int
-  userId    Int
-  session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@id([sessionId, userId])
-}
-```
-
-## Development Scripts
-
-### Backend
+**Backend** (`backend/`)
 
 ```bash
-npm run dev          # Start development server with nodemon
-npm run build        # Build TypeScript to JavaScript
-npm start            # Start production server
-npm run prisma:generate  # Generate Prisma client
-npm run prisma:migrate   # Run database migrations
-npm run prisma:seed      # Seed the database
-npm run prisma:studio    # Open Prisma Studio
+npm run build            # Compile le TypeScript
+npm start                # Lance la version compilée
+npm run prisma:generate  # Génère le client Prisma
+npm run prisma:studio    # Ouvre Prisma Studio
 ```
 
-### Frontend
+**Frontend** (`frontend/`)
 
 ```bash
-npm run dev          # Start Vite development server
-npm run build        # Build for production
-npm run preview      # Preview production build
+npm run build            # Build de production
+npm run preview          # Prévisualise le build
 ```
 
-## Project Structure
+## Lancer les tests
+
+Le projet comporte quatre niveaux de tests :
+
+| Niveau                                                       | Outil                          | Dossier                                                             | Pré-requis                                                         |
+| ------------------------------------------------------------ | ------------------------------ | ------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| Back : unitaires (utils, services, middlewares, controllers) | Vitest                         | `backend/src/**/*.test.ts`                                          | Aucun (Prisma est mocké)                                           |
+| Back : intégration (API appelée en HTTP avec `fetch`)        | Vitest                         | `backend/tests/integration/api.integration.test.ts`                 | PostgreSQL démarrée et migrée (voir [Installation](#installation)) |
+| Front : composants et pages                                  | Vitest + React Testing Library | `frontend/src/**/*.test.tsx` (setup : `frontend/src/test/setup.ts`) | Aucun                                                              |
+| E2E : parcours complets dans le navigateur                   | Playwright                     | `frontend/e2e/`                                                     | Base + backend + frontend lancés                                   |
+
+### Tests du backend
+
+```bash
+cd backend
+npm test            # tests unitaires + intégration, exécution unique
+npm run test:watch  # mode watch
+```
+
+- Les **tests unitaires** sont placés à côté du code qu'ils testent (`*.test.ts` dans `src/`).
+- Les **tests d'intégration** sont dans `tests/integration/` : ils interrogent l'API avec `fetch`, route par route.
+
+### Tests du frontend
+
+```bash
+cd frontend
+npm test            # exécution unique
+npm run test:watch  # mode watch
+```
+
+### Tests end-to-end (Playwright)
+
+1. Installer les navigateurs de Playwright (une seule fois) :
+
+   ```bash
+   cd frontend
+   npx playwright install
+   ```
+
+2. Préparer l'environnement : PostgreSQL démarré, base **migrée et seedée**, backend lancé (`npm run dev` dans `backend/`). Le frontend est démarré automatiquement par Playwright, ou manuellement avec `npm run dev`.
+
+3. Lancer les tests :
+
+   ```bash
+   cd frontend
+   npm run test:e2e
+   ```
+
+   Options utiles :
+
+   ```bash
+   npx playwright test --ui        # interface interactive
+   npx playwright test --headed    # navigateur visible
+   npx playwright show-report      # rapport HTML des derniers tests
+   ```
+
+Remarques :
+
+- Les specs utilisent les comptes du seed (`yoga@studio.com`, `user@test.com`) et créent des comptes jetables (`e2e.*@test.com`). Pour repartir d'une base propre : `cd backend && npx prisma migrate reset` (réapplique les migrations et relance le seed).
+- Les tests de promotion en administrateur nécessitent un backend en `NODE_ENV=development` et un frontend servi par `vite` (mode dev). Ils sont ignorés automatiquement avec un build de production.
+
+## Générer les rapports de couverture
+
+Un seuil minimal de **80 %** est exigé pour chaque indicateur : instructions (_statements_), branches, fonctions et lignes. Les commandes échouent si un indicateur est sous ce seuil.
+
+| Périmètre | Commande                               | Rapport HTML                   |
+| --------- | -------------------------------------- | ------------------------------ |
+| Backend   | `cd backend && npm run test:coverage`  | `backend/coverage/index.html`  |
+| Frontend  | `cd frontend && npm run test:coverage` | `frontend/coverage/index.html` |
+
+Chaque commande affiche aussi un tableau récapitulatif dans le terminal. Les seuils et les fichiers pris en compte sont configurés dans `backend/vitest.config.ts` et `frontend/vitest.config.ts`. Pour consulter un rapport, ouvrir le fichier `index.html` correspondant dans un navigateur : il détaille, fichier par fichier, les lignes et branches non couvertes.
+
+### Rapport des tests E2E
+
+Les tests Playwright produisent un rapport d'exécution (tests réussis, échoués, ignorés, captures et traces) :
+
+```bash
+cd frontend
+npx playwright show-report
+```
+
+## API
+
+### Santé
+
+- `GET /api/health` : état de l'API
+
+### Authentification
+
+- `POST /api/auth/register` : création de compte
+- `POST /api/auth/login` : connexion, retourne un JWT
+
+### Sessions (JWT requis)
+
+- `GET /api/session` : liste des sessions
+- `GET /api/session/:id` : détail d'une session
+- `POST /api/session` : création (admin)
+- `PUT /api/session/:id` : modification (admin)
+- `DELETE /api/session/:id` : suppression (admin)
+- `POST /api/session/:id/participate/:userId` : rejoindre une session
+- `DELETE /api/session/:id/participate/:userId` : quitter une session
+
+### Professeurs (JWT requis)
+
+- `GET /api/teacher` : liste des professeurs
+- `GET /api/teacher/:id` : détail d'un professeur
+
+### Utilisateurs (JWT requis)
+
+- `GET /api/user/:id` : détail d'un utilisateur
+- `DELETE /api/user/:id` : suppression de son propre compte
+- `POST /api/user/promote-admin` : se promouvoir administrateur (**développement uniquement**)
+
+Les routes protégées attendent l'en-tête `Authorization: Bearer <token>`.
+
+Le schéma de la base de données est défini dans `backend/prisma/schema.prisma`.
+
+## Structure du projet
 
 ```
-p4-dfsjs-starter/
+Yoga-Studio/
 ├── backend/
 │   ├── src/
-│   │   ├── controllers/      # Request handlers
-│   │   ├── middleware/       # Auth middleware
-│   │   ├── dto/              # Zod validation schemas
-│   │   ├── utils/            # JWT utilities
-│   │   ├── routes/           # API routes
-│   │   └── app.ts            # Express app setup
+│   │   ├── controllers/      # Gestionnaires de requêtes
+│   │   ├── services/         # Logique métier
+│   │   ├── middleware/       # Authentification, gestion des erreurs
+│   │   ├── dto/              # Schémas de validation
+│   │   ├── utils/            # JWT, AppError, catchAsync, client Prisma
+│   │   ├── routes/           # Routes de l'API
+│   │   └── app.ts            # Configuration de l'application Express
 │   ├── prisma/
-│   │   ├── schema.prisma     # Database schema
-│   │   └── seed.ts           # Database seeding
-│   ├── package.json
-│   ├── tsconfig.json
-│   └── .env
+│   │   ├── schema.prisma     # Schéma de la base
+│   │   └── seed.ts           # Données de démonstration
+│   ├── tests/
+│   │   └── integration/
+│   │       └── api.integration.test.ts   # Tests d'intégration de l'API
+│   └── vitest.config.ts
 ├── frontend/
 │   ├── src/
-│   │   ├── pages/            # React page components
-│   │   ├── components/       # Reusable components
-│   │   ├── services/         # API services
-│   │   ├── types/            # TypeScript types
-│   │   ├── App.tsx
-│   │   └── main.tsx
-│   ├── package.json
+│   │   ├── pages/            # Pages React
+│   │   ├── components/       # Composants réutilisables
+│   │   ├── services/         # Appels API
+│   │   ├── hooks/            # Hooks personnalisés
+│   │   ├── test/             # Configuration des tests (setup.ts)
+│   │   └── types/            # Types TypeScript
+│   ├── e2e/                  # Specs Playwright
+│   ├── playwright.config.ts
 │   ├── vite.config.ts
-│   └── tailwind.config.js
+│   └── vitest.config.ts
 ├── docker-compose.yml
 └── README.md
 ```
 
-## Testing
+## Dépannage
 
-The project supports comprehensive testing with the following frameworks:
-- **Unit tests**: For testing individual components and utilities
-- **Integration tests**: For testing API endpoints
-- **End-to-end tests**: For testing critical user flows
+### Connexion à la base impossible
 
-Run tests with the appropriate npm scripts in each directory.
-
-## Troubleshooting
-
-### Database connection issues
 ```bash
-# Check if PostgreSQL is running
-docker ps
-
-# Restart PostgreSQL
+docker ps                          # PostgreSQL tourne-t-il ?
 docker-compose restart postgres
-
-# View logs
 docker-compose logs postgres
 ```
 
-### Port already in use
+### Port déjà utilisé
+
 ```bash
-# Check what's using port 8080
-lsof -i :8080
-
-# Check what's using port 3000
-lsof -i :3000
-
-# Kill the process if needed
+lsof -i :8080   # backend
+lsof -i :3000   # frontend
 kill -9 <PID>
 ```
 
-### Prisma issues
-```bash
-# Reset database (WARNING: deletes all data)
-npx prisma migrate reset
+### Problèmes Prisma
 
-# Regenerate Prisma client
+```bash
+npx prisma migrate reset   # ATTENTION : supprime toutes les données puis relance le seed
 npx prisma generate
 ```
 
-## Contributing
+### Les tests E2E échouent avec des erreurs de connexion ou de données
 
-Please follow the existing code style and ensure all tests pass before submitting changes.
+Vérifier que le backend est lancé, que la base est seedée (voir [Installation](#installation)) et que les ports 8080 et 3000 sont libres. En cas de doute, réinitialiser la base avec `npx prisma migrate reset`.
 
-## License
+## Licence
 
 MIT
